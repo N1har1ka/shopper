@@ -7,14 +7,13 @@ const multer = require("multer");
 const path = require("path");
 const cors = require("cors");
 const { type } = require("os");
+require("dotenv").config();
 
 app.use(express.json());
 app.use(cors());
 
 //Database connection with mongodbatlas
-mongoose.connect(
-  "mongodb+srv://niharika202310:ClHpLAE6lvJG80YH@cluster0.idqgek4.mongodb.net/shopper"
-);
+mongoose.connect(process.env.MONGODB_URI);
 
 app.get("/", (req, res) => {
   res.send("express app is running");

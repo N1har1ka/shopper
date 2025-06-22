@@ -36,7 +36,7 @@ const AddProduct = () => {
         responseDate = data;
       });
 
-    if (responseDate.succes) {
+    if (responseDate.success) {
       product.image = responseDate.image_url;
       await fetch("http://localhost:3000/addproduct", {
         method: "POST",

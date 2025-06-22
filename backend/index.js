@@ -7,6 +7,7 @@ const multer = require("multer");
 const path = require("path");
 const cors = require("cors");
 const { type } = require("os");
+const { error } = require("console");
 require("dotenv").config();
 
 app.use(express.json());
@@ -35,7 +36,7 @@ const upload = multer({ storage: storage });
 app.use("/images", express.static("upload/images"));
 app.post("/upload", upload.single("product"), (req, res) => {
   res.json({
-    succes: 1,
+    success: 1,
     image_url: `http://localhost:${port}/images/${req.file.filename}`,
   });
 });
@@ -90,6 +91,150 @@ app.post("/removeproduct", async (req, res) => {
 app.get("/allProducts", async (req, res) => {
   let products = await Product.find({});
   res.send(products);
+});
+
+//user schema
+const Users = mongoose.model("Users", {
+  name: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  cartData: { type: Object },
+  date: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
+app.post("/signup", async (req, res) => {
+  let check = await Users.findOne({ email: req.body.email });
+  if (check) {
+    return res
+      .status(400)
+      .json({ success: false, errors: "email alreayd exists" });
+  }
+  let cart = {};
+  for (let i = 0; i < 300; i++) {
+    cart[i] = 0;
+  }
+  const user = new Users({
+    name: req.body.username,
+
+    email: req.body.email,
+    password: req.body.password,
+    cartData: cart,
+  });
+  await user.save();
+  const data = {
+    user: {
+      id: user.id,
+    },
+  };
+  const token = jwt.sign(data, "secret_ecom");
+  res.json({ success: true, token });
+});
+
+app.post("/login", async (req, res) => {
+  let user = await Users.findOne({ email: req.body.email });
+  if (user) {
+    const passcompare = req.body.password === user.password;
+    if (passcompare) {
+      const data = {
+        user: {
+          id: user.id,
+        },
+      };
+      const token = jwt.sign(data, "secret_ecom");
+      res.json({ success: true, token });
+    } else {
+      res.json({ success: false, errors: "Wrong password" });
+    }
+  } else {
+    res.json({ success: false, errors: "Wrong emailid" });
+  }
+});
+
+app.get("/newcollections", async (req, res) => {
+  let products = await Product.find({});
+  let newcollection = products.slice(1).slice(-8);
+  res.send(newcollection);
+});
+
+app.get("/popularinwomen", async (req, res) => {
+  let products = await Product.find({ category: "women" });
+  let popularinwoman = products.slice(0, 4);
+  res.send(popularinwoman);
+});
+const fetchUser = async (req, res, next) => {
+  const token = req.header("auth-token");
+  if (!token) {
+    res.status(401).send({ errors: "please authetnicate using valid token" });
+  } else {
+    try {
+      const data = jwt.verify(token, "secret_ecom");
+      req.user = data.user;
+      next();
+    } catch (error) {
+      res.status(401).send({ errors: "please authetnicate using valid token" });
+    }
+  }
+};
+app.post("/addtocart", fetchUser, async (req, res) => {
+  const userId = req.user?.id;
+
+  if (!userId) {
+    return res.status(400).json({ success: false, message: "Invalid user ID" });
+  }
+
+  let userdata = await Users.findOne({ _id: userId });
+
+  if (!userdata) {
+    return res.status(404).json({ success: false, message: "User not found" });
+  }
+
+  const itemId = req.body.itemId;
+
+  if (!userdata.cartData.hasOwnProperty(itemId)) {
+    userdata.cartData[itemId] = 0; // optional safety
+  }
+
+  userdata.cartData[itemId] += 1;
+
+  await Users.findByIdAndUpdate(userId, { cartData: userdata.cartData });
+
+  res.json({ success: true, message: "Item added to cart" });
+});
+
+app.post("/removefromcart", fetchUser, async (req, res) => {
+  const userId = req.user.id;
+  let userdata = await Users.findOne({ _id: userId });
+
+  if (!userdata) {
+    return res.status(404).json({ success: false, message: "User not found" });
+  }
+
+  const itemId = req.body.itemId;
+
+  if (userdata.cartData[itemId] > 0) {
+    userdata.cartData[itemId] -= 1;
+  }
+
+  await Users.findByIdAndUpdate(userId, { cartData: userdata.cartData });
+
+  res.json({ success: true, message: "Removed" });
+});
+
+app.post("/getcart", fetchUser, async (req, res) => {
+  // console.log("Incoming getcart request. User ID:", req.user.id);
+
+  const userdata = await Users.findOne({ _id: req.user.id });
+
+  if (!userdata) {
+    // console.log("User not found in DB.");
+    return res.status(404).json({ success: false, message: "User not found" });
+  }
+
+  // console.log("Returning cartData:", userdata.cartData);
+  res.json(userdata.cartData);
 });
 
 app.listen(port, (error) => {

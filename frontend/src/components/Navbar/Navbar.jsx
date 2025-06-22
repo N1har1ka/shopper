@@ -63,12 +63,24 @@ const Navbar = () => {
 
         {/* Right Side on All Screens */}
         <div className="flex items-center gap-4">
-          {/* Login Button */}
-          <Link to="/login">
-            <button className=" lg:px-10 lg:py-3 lg:text-xl border border-[#d4cdcd] px-4 py-1 rounded-full text-sm hover:bg-[#f3f3f3]">
-              Login
+          {localStorage.getItem("auth-token") ? (
+            <button
+              onClick={() => {
+                localStorage.removeItem("auth-token");
+                window.location.replace("/");
+              }}
+              className=" cursor-pointer lg:px-10 lg:py-3 lg:text-xl border border-[#d4cdcd] px-4 py-1 rounded-full text-sm hover:bg-[#f3f3f3]"
+            >
+              Log out
             </button>
-          </Link>
+          ) : (
+            <Link to="/login">
+              <button className="cursor-pointer lg:px-10 lg:py-3 lg:text-xl border border-[#d4cdcd] px-4 py-1 rounded-full text-sm hover:bg-[#f3f3f3]">
+                Login
+              </button>
+            </Link>
+          )}
+          {/* Login Button */}
 
           {/* Cart Icon */}
           <div className="relative">

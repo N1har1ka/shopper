@@ -31,7 +31,7 @@ const CartItems = () => {
                 <img
                   src={e.image}
                   alt={e.name}
-                  className="w-16 sm:w-20 object-contain"
+                  className="w-16 sm:w-20 object-contain cursor-pointer"
                 />
                 <p className="text-sm sm:text-base font-medium">{e.name}</p>
                 <p className="hidden md:block">${e.new_price}</p>
@@ -49,12 +49,12 @@ const CartItems = () => {
                 <button
                   onClick={() => removeFromCart(e.id)}
                   aria-label="Remove item"
-                  className="w-5 sm:w-6"
+                  className="w-5 sm:w-6 "
                 >
                   <img
                     src={remove_icon}
                     alt="Remove from cart"
-                    className="w-full"
+                    className="w-full cursor-pointer"
                   />
                 </button>
               </article>

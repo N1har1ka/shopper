@@ -80,7 +80,7 @@ const ProductDisplay = ({ product }) => {
           <div>
             <button
               onClick={() => addToCart(product.id)}
-              className="mt-3 sm:mt-4 px-5 py-2 sm:px-6 sm:py-3 bg-red-500 hover:bg-red-600 text-white font-semibold rounded transition  sm:w-auto"
+              className="cursor-pointer mt-3 sm:mt-4 px-5 py-2 sm:px-6 sm:py-3 bg-red-500 hover:bg-red-600 text-white font-semibold rounded transition  sm:w-auto"
             >
               ADD TO CART
             </button>

@@ -237,6 +237,35 @@ app.post("/getcart", fetchUser, async (req, res) => {
   res.json(userdata.cartData);
 });
 
+// const bulkProducts = require("./Assets/data"); // You’ll create this file next
+
+// app.post("/upload-products", async (req, res) => {
+//   try {
+//     let products = await Product.find({});
+//     let id = products.length;
+
+//     const insertedProducts = await Promise.all(
+//       bulkProducts.map(async (product, index) => {
+//         const imageName = product.image.split("/").pop(); // extract image file name
+//         const newProduct = new Product({
+//           id: id + index + 1,
+//           name: product.name,
+//           category: product.category,
+//           image: `http://localhost:${port}/images/${imageName}`,
+//           new_price: product.new_price,
+//           old_price: product.old_price,
+//         });
+//         return await newProduct.save();
+//       })
+//     );
+
+//     res.status(200).json({ success: true, data: insertedProducts });
+//   } catch (err) {
+//     console.error("Error inserting products:", err);
+//     res.status(500).json({ success: false, message: "Internal server error" });
+//   }
+// });
+
 app.listen(port, (error) => {
   if (!error) {
     console.log("Server running on Port " + port);
